@@ -4,7 +4,7 @@ class WSModbusModule {
   public const MODE_NORMAL = 0x00;
   public const MODE_LINKAGE = 0x01;
   public const MODE_FLIP = 0x02;
-  public cost MODE_JUMP = 0x03;
+  public const MODE_JUMP = 0x03;
 
   // module's IP address
   private $ip;
