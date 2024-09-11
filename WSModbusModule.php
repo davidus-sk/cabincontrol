@@ -106,7 +106,7 @@ class WSModbusModule {
   private function getRelayStates()
   {
     @socket_write($this->socket, "\x01\x01\x00\x00\x00\x08\x3D\xCC\n");
-    $data = @socket_read($socket, 2048);
+    $data = @socket_read($this->socket, 2048);
 
     if ($data && strlen($data) == 6) {
       $this->relayStates = ord($data[3]);
