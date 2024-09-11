@@ -134,7 +134,7 @@ class WSModbusModule {
     $message[7] = $crc >> 8;
     $message[8] = "\n";
 
-    @socket_write($this->socket, $message, strlen($message));
+    @socket_write($this->socket, pack("C*", ...$message));
     $data = @socket_read($socket, 2048);
 
     $this->getRelayStates();
