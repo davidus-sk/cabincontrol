@@ -138,4 +138,29 @@ class WSModbusModule {
 
     $this->getRelayStates();
   }//func
+
+  public function setAllRelayStates($state)
+  {
+    $message = [];
+    $message[0] = 0x01;
+    $message[1] = 0x05;
+    $message[2] = 0x00;
+    $message[3] = 0xff;
+    $message[4] = $state ? 0xff : 0x00;
+    $message[5] = 0x00;
+    $crc = $this->calculateCrc($message);
+    $message[6] = $crc & 0xFF;
+    $message[7] = $crc >> 8;
+
+    @socket_write($this->socket, pack("C*", ...$message));
+    $data = @socket_read($this->socket, 1024);
+
+    $this->getRelayStates();
+  }//func
+
+  public function setMode()
+  {
+    @socket_write($this->socket, "\x01\x06\x10\x01\x00\x02\x5D\x0B");
+    $data = @socket_read($this->socket, 1024);
+  }
 }//class
