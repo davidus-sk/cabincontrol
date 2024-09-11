@@ -14,6 +14,6 @@ for ($i=1; $i<=8; $i++) {
   sleep(1);
 }
 
-$module->setMode();
+$module->setModeForAll(WSModbusModule::MODE_FLIP);
 
 unset($module);
