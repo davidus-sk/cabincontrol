@@ -1,9 +1,16 @@
 <?php
 
 class WSModbusModule {
+  // normal mode, the relay is directly controlled through commands
   public const MODE_NORMAL = 0x00;
+
+  // linkage mode, Relay status is the same as the corresponding input channel status
   public const MODE_LINKAGE = 0x01;
+
+  // flip mode, input channel input a pulse corresponding to the relay state flip once
   public const MODE_FLIP = 0x02;
+
+  // jump mode, the input channel level jumps once and the corresponding relay state flips once
   public const MODE_JUMP = 0x03;
 
   // module's IP address
@@ -108,6 +115,11 @@ class WSModbusModule {
     }//if
   }//func
 
+  /**
+   * Get states for all relays
+   *
+   * @return void
+   */
   private function getRelayStates()
   {
     @socket_write($this->socket, "\x01\x01\x00\x00\x00\x08\x3D\xCC");
@@ -118,11 +130,17 @@ class WSModbusModule {
     }//if
   }//func
 
+  /**
+   * Get relay's state
+   * 
+   * @var $relayNumber int - Relay number to query, 1-indexed
+   * @return bool
+   */
   public function getRelayState($relayNumber)
   {
     $this->getRelayStates();
 
-    return ($this->relayStates >> ($relayNumber - 1)) & 1;
+    return ($this->relayStates >> ($relayNumber - 1)) & 0x01;
   }//func
 
   public function setRelayState($relayNumber, $state)
@@ -185,5 +203,21 @@ class WSModbusModule {
 
     @socket_write($this->socket, pack("C*", ...$message));
     $data = @socket_read($this->socket, 1024);
+  }//func
+
+  /**
+   * Return relay states as JSON object
+   *
+   * @return json
+   */
+  public function relayStatesToJson()
+  {
+    $states = [];
+
+    for ($i = 0; $i < 8; $i++) {
+      $states[] = ($this->relayStates >> $i) & 0x01;
+    }//for
+
+    return json_encode($states);
   }//func
 }//class
