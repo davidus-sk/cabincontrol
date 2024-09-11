@@ -77,8 +77,8 @@ class WSModbusModule {
 
     foreach ($message as $m) {
       $index = $crcLow ^ $m;
-      $crcLow = $crcHigh ^ $CRCTableHigh[$index];
-      $crcHigh = $CRCTableLow[$index];
+      $crcLow = $crcHigh ^ $this->CRCTableHigh[$index];
+      $crcHigh = $this->CRCTableLow[$index];
     }//foreach
 
     return ($crcHigh << 8 | $crcLow);
