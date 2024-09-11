@@ -14,4 +14,6 @@ for ($i=1; $i<=8; $i++) {
   sleep(1);
 }
 
+$module->setMode();
+
 unset($module);
