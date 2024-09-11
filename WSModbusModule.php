@@ -1,6 +1,11 @@
 <?php
 
 class WSModbusModule {
+  public const MODE_NORMAL = 0x00;
+  public const MODE_LINKAGE = 0x01;
+  public const MODE_FLIP = 0x02;
+  public cost MODE_JUMP = 0x03;
+
   // module's IP address
   private $ip;
 
@@ -158,9 +163,27 @@ class WSModbusModule {
     $this->getRelayStates();
   }//func
 
-  public function setMode()
+  public function setModeForAll($mode)
   {
-    @socket_write($this->socket, "\x01\x06\x10\x01\x00\x02\x5D\x0B");
+    $message = [];
+    $message[0] = 0x01;
+    $message[1] = 0x10;
+    $message[2] = 0x10;
+    $message[3] = 0x00;
+    $message[4] = 0x00;
+    $message[5] = 0x08;
+    $message[6] = 0x10;
+
+    for ($i=1; $i<=8; $i++) {
+      $message[] = 0x00;
+      $message[] = $mode; 
+    }//for
+
+    $crc = $this->calculateCrc($message);
+    $message[] = $crc & 0xFF;
+    $message[] = $crc >> 8;
+
+    @socket_write($this->socket, pack("C*", ...$message));
     $data = @socket_read($this->socket, 1024);
-  }
+  }//func
 }//class
