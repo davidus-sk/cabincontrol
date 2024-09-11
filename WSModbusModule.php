@@ -120,7 +120,7 @@ class WSModbusModule {
    *
    * @return void
    */
-  private function getRelayStates()
+  public function getRelayStates()
   {
     @socket_write($this->socket, "\x01\x01\x00\x00\x00\x08\x3D\xCC");
     $data = @socket_read($this->socket, 1024);
