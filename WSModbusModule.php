@@ -146,6 +146,29 @@ class WSModbusModule
     return ($crcHigh << 8 | $crcLow);
   }//func
 
+  /**
+   * Send command to socket
+   *
+   * @var $command ints - each byte is a new parameter
+   * @return string
+   */
+  private function sendCommand(...$command)
+  {
+    $c = [];
+
+    foreach ($command as $byte) {
+      $c[] = $byte;
+    }//foreach
+
+    $crc = $this->calculateCrc($c);
+    
+    $c[] = $crc & 0xFF;
+    $c[] = $crc >> 8;
+    
+    @socket_write($this->socket, pack("C*", ...$c));
+    return @socket_read($this->socket, 1024);
+  }//func
+
   // PUBLIC METHODS ////////////////////////////////////////////////
 
   /**
@@ -155,8 +178,7 @@ class WSModbusModule
    */
   public function getRelayStates()
   {
-    @socket_write($this->socket, "\x01\x01\x00\x00\x00\x08\x3D\xCC");
-    $data = @socket_read($this->socket, 1024);
+    $data = $this->sendCommand(0x01, 0x01, 0x00, 0x00, 0x00, 0x08);
 
     if ($data && strlen($data) == 6) {
       $this->relayStates = ord($data[3]);
@@ -172,7 +194,6 @@ class WSModbusModule
   public function getRelayState($relayNumber)
   {
     $this->getRelayStates();
-
     return ($this->relayStates >> ($relayNumber - 1)) & 0x01;
   }//func
 
@@ -185,20 +206,7 @@ class WSModbusModule
    */
   public function setRelayState($relayNumber, $state)
   {
-    $message = [];
-    $message[0] = 0x01;
-    $message[1] = 0x05;
-    $message[2] = 0x00;
-    $message[3] = $relayNumber - 1;
-    $message[4] = $state ? 0xff : 0x00;
-    $message[5] = 0x00;
-    $crc = $this->calculateCrc($message);
-    $message[6] = $crc & 0xFF;
-    $message[7] = $crc >> 8;
-
-    @socket_write($this->socket, pack("C*", ...$message));
-    $data = @socket_read($this->socket, 1024);
-
+    $this->sendCommand(0x01, 0x05, 0x00, $relayNumber - 1, $state ? 0xff : 0x00, 0x00);
     $this->getRelayStates();
   }//func
 
@@ -210,20 +218,7 @@ class WSModbusModule
    */
   public function setAllRelayStates($state)
   {
-    $message = [];
-    $message[0] = 0x01;
-    $message[1] = 0x05;
-    $message[2] = 0x00;
-    $message[3] = 0xff;
-    $message[4] = $state ? 0xff : 0x00;
-    $message[5] = 0x00;
-    $crc = $this->calculateCrc($message);
-    $message[6] = $crc & 0xFF;
-    $message[7] = $crc >> 8;
-
-    @socket_write($this->socket, pack("C*", ...$message));
-    $data = @socket_read($this->socket, 1024);
-
+    $this->sendCommand(0x01, 0x05, 0x00, 0xff, $state ? 0xff : 0x00, 0x00);
     $this->getRelayStates();
   }//func
 
