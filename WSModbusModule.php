@@ -1,7 +1,9 @@
 <?php
 /**
- * PHP control class for Waveshare Modbus PoE Eth Relay (B)
+ * PHP control class for Waveshare Modbus PoE Eth Relay (B) device
+ *
  * https://www.waveshare.com/product/modbus-poe-eth-relay-b.htm.htm
+ * https://www.waveshare.com/wiki/Modbus_POE_ETH_Relay_(B)
  *
  * @author davidus.sk
  */
