@@ -1,6 +1,12 @@
 <?php
-
-class WSModbusModule {
+/**
+ * PHP control class for Waveshare Modbus PoE Eth Relay (B)
+ * https://www.waveshare.com/product/modbus-poe-eth-relay-b.htm.htm
+ *
+ * @author davidus.sk
+ */
+class WSModbusModule
+{
   // normal mode, the relay is directly controlled through commands
   public const MODE_NORMAL = 0x00;
 
@@ -70,17 +76,59 @@ class WSModbusModule {
   0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
   0x40];
 
-  public function __construct($ip, $port) {
+  // CONSTRUCTOR & DESTRUCTOR ////////////////////////////////////////
+
+  public function __construct($ip, $port)
+  {
     $this->ip = $ip;
     $this->port = $port;
 
     $this->createSocketConnection();
   }//func
 
-  public function __destruct() {
+  public function __destruct()
+  {
     $this->closeSocketConnection();
   }//func
 
+  // PRIVATE METHODS ////////////////////////////////////////////////
+
+  /**
+   * Create socket connection to host
+   *
+   * @return void
+   */
+  private function createSocketConnection()
+  {
+    $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+
+    if (!$this->socket) {
+      throw new Exception("Could not create socket: " . socket_strerror(socket_last_error()));
+    }//if
+
+    if (!socket_connect($this->socket, $this->ip, $this->port)) {
+      throw new Exception("Could not connect to server: " . socket_strerror(socket_last_error()));
+    }//if
+  }//func
+
+  /**
+   * Close socket
+   *
+   * @return void
+   */
+  private function closeSocketConnection()
+  {
+    if ($this->socket) {
+      socket_close($this->socket);
+    }//if
+  }//func
+
+  /**
+   * Calculate CRC bytes for the message
+   *
+   * @var $message array
+   * @return int
+   */
   private function calculateCrc($message)
   {
     $crcHigh = 0xff;
@@ -96,24 +144,7 @@ class WSModbusModule {
     return ($crcHigh << 8 | $crcLow);
   }//func
 
-  private function createSocketConnection() {
-    $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-
-    if (!$this->socket) {
-      throw new Exception("Could not create socket: " . socket_strerror(socket_last_error()));
-    }//if
-
-    if (!socket_connect($this->socket, $this->ip, $this->port)) {
-      throw new Exception("Could not connect to server: " . socket_strerror(socket_last_error()));
-    }//if
-  }//func
-
-  private function closeSocketConnection()
-  {
-    if ($this->socket) {
-      socket_close($this->socket);
-    }//if
-  }//func
+  // PUBLIC METHODS ////////////////////////////////////////////////
 
   /**
    * Get states for all relays
@@ -143,6 +174,13 @@ class WSModbusModule {
     return ($this->relayStates >> ($relayNumber - 1)) & 0x01;
   }//func
 
+  /**
+   * Set relay's state
+   *
+   * @var $relayNumber int - Relay number to set, 1-indexed
+   * @var $state bool
+   * @return void
+   */
   public function setRelayState($relayNumber, $state)
   {
     $message = [];
@@ -162,6 +200,12 @@ class WSModbusModule {
     $this->getRelayStates();
   }//func
 
+  /**
+   * Flip all relays at once to ON or OFF
+   *
+   * @var $state bool
+   * @return void
+   */
   public function setAllRelayStates($state)
   {
     $message = [];
@@ -181,6 +225,12 @@ class WSModbusModule {
     $this->getRelayStates();
   }//func
 
+  /**
+   * Set WS's input and output operational mode
+   *
+   * @var $mode int - See constants in this class
+   * @return void
+   */
   public function setModeForAll($mode)
   {
     $message = [];
@@ -206,11 +256,12 @@ class WSModbusModule {
   }//func
 
   /**
-   * Return relay states as JSON object
+   * Return relay states as an array
    *
-   * @return json
+   * @var $json bool - Return relay states as json array
+   * @return array|string
    */
-  public function relayStatesToJson()
+  public function relayStatesToArray($json = false)
   {
     $states = [];
 
@@ -218,6 +269,6 @@ class WSModbusModule {
       $states[] = ($this->relayStates >> $i) & 0x01;
     }//for
 
-    return json_encode($states);
+    return $json ? json_encode($states) : $states;
   }//func
 }//class
