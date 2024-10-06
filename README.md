@@ -1,6 +1,6 @@
 # Cabin Control - Custom made smart cabin implementation
 
-A simple "smart home" system to control the lights, pumps, water collection, and other items at my remote, solar-powered cabin.
+A simple "smart home" system designed to control the lights, pumps, water collection, and other items at my remote, solar-powered cabin.
 
 ## Requirements
 
@@ -12,3 +12,12 @@ A simple "smart home" system to control the lights, pumps, water collection, and
 - [ ] Attach several temperature sensors
 - [ ] Attach V and A sensors to monitor power usage
 - [ ] Water level measurement for rain collection cistern
+- [ ] Basic VMS functionality
+
+## Hardware needed
+
+- Raspberry Pi 4B or better
+- Waveshare 8-ch Ethernet Relay Module (B)
+- 512 GB SSD with USB adapter (for video storage)
+- PoE switch with 12VDC input
+- PoE cameras
