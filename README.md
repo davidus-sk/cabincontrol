@@ -16,8 +16,9 @@ A simple "smart home" system designed to control the lights, pumps, water collec
 
 ## Hardware needed
 
-- Raspberry Pi 4B or better
-- Waveshare 8-ch Ethernet Relay Module (B)
-- 512 GB SSD with USB adapter (for video storage)
-- PoE switch with 12VDC input
-- PoE cameras
+- [x] Raspberry Pi 4B or better
+- [ ] DIN rail bracket for the Pi
+- [x] Waveshare 8-ch Ethernet Relay Module (B)
+- [ ] 512 GB SSD with USB adapter (for video storage)
+- [ ] PoE switch with 12VDC input
+- [ ] PoE cameras
