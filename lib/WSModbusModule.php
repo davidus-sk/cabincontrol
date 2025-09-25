@@ -172,6 +172,20 @@ class WSModbusModule
   // PUBLIC METHODS ////////////////////////////////////////////////
 
   /**
+   * Get states for all inputs
+   *
+   * @return void
+   */
+  public function getInputStates()
+  {
+    $data = $this->sendCommand(0x01, 0x02, 0x00, 0x00, 0x00, 0x08);
+
+    if ($data && strlen($data) == 6) {
+      $this->inputStates = ord($data[3]);
+    }//if
+  }//func
+
+  /**
    * Get states for all relays
    *
    * @return void
@@ -221,6 +235,12 @@ class WSModbusModule
     $this->sendCommand(0x01, 0x05, 0x00, 0xff, $state ? 0xff : 0x00, 0x00);
     $this->getRelayStates();
   }//func
+  
+  public function setRelayFlash($relayNumber, $state, $duration)
+  {
+    $duration = $duration * 10;
+    $this->sendCommand(0x01, 0x05, $state ? 0x02 : 0x04, $relayNumber - 1, $duration >> 8, $duration & 255);
+  }//func
 
   /**
    * Set WS's input and output operational mode
@@ -250,6 +270,23 @@ class WSModbusModule
 
     @socket_write($this->socket, pack("C*", ...$message));
     $data = @socket_read($this->socket, 1024);
+  }//func
+
+  /**
+   * Return input states as an array
+   *
+   * @var $json bool - Return input states as json array
+   * @return array|string
+   */
+  public function inputStatesToArray($json = false)
+  {
+    $states = [];
+
+    for ($i = 0; $i < 8; $i++) {
+      $states[] = ($this->inputStates >> $i) & 0x01;
+    }//for
+
+    return $json ? json_encode($states) : $states;
   }//func
 
   /**
